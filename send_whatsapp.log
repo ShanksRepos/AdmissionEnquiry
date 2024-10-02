@@ -1,0 +1,72 @@
+2024-07-31 10:48:44,285:ERROR:Not enough arguments provided. Usage: python send_whatsapp.py <contact> <message> <api_key>
+2024-07-31 10:49:37,060:ERROR:Not enough arguments provided. Usage: python send_whatsapp.py <contact> <message> <api_key>
+2024-07-31 10:49:49,787:ERROR:Not enough arguments provided. Usage: python send_whatsapp.py <contact> <message> <api_key>
+2024-07-31 10:50:16,301:ERROR:Not enough arguments provided. Usage: python send_whatsapp.py <contact> <message> <api_key>
+2024-07-31 10:53:15,769:ERROR:Not enough arguments provided. Usage: python send_whatsapp.py <contact> <message> <api_key>
+2024-07-31 11:00:39,636:ERROR:Not enough arguments provided. Usage: python send_whatsapp.py <contact> <message> <api_key>
+2024-07-31 22:27:02,461:ERROR:Failed to send message to undefined. Error: [Errno 11001] getaddrinfo failed
+2024-07-31 22:30:30,894:INFO:Message sent successfully to undefined. Response: {"messages":"The request to the API has timed out. Please try again later, or if the issue persists, please contact the API provider", "info": "Your Client (working) ---> Gateway (working) ---> API (took too long to respond)"}
+2024-07-31 22:33:37,816:INFO:Message sent successfully to undefined. Response: {"messages":"The request to the API has timed out. Please try again later, or if the issue persists, please contact the API provider", "info": "Your Client (working) ---> Gateway (working) ---> API (took too long to respond)"}
+2024-07-31 22:44:10,699:INFO:Message sent successfully to undefined. Response: {"messages":"The request to the API has timed out. Please try again later, or if the issue persists, please contact the API provider", "info": "Your Client (working) ---> Gateway (working) ---> API (took too long to respond)"}
+2024-07-31 22:44:21,654:INFO:Message sent successfully to undefined. Response: {"messages":"The request to the API has timed out. Please try again later, or if the issue persists, please contact the API provider", "info": "Your Client (working) ---> Gateway (working) ---> API (took too long to respond)"}
+2024-07-31 22:47:37,674:INFO:Contact: undefined
+2024-07-31 22:47:37,674:INFO:Message: testing
+2024-07-31 22:47:48,198:INFO:Message sent successfully to undefined. Response: {"messages":"The request to the API has timed out. Please try again later, or if the issue persists, please contact the API provider", "info": "Your Client (working) ---> Gateway (working) ---> API (took too long to respond)"}
+2024-07-31 22:49:39,401:INFO:Contact: undefined
+2024-07-31 22:49:39,401:INFO:Message: test
+2024-07-31 22:49:52,700:INFO:Message sent successfully to undefined. Response: {"messages":"The request to the API has timed out. Please try again later, or if the issue persists, please contact the API provider", "info": "Your Client (working) ---> Gateway (working) ---> API (took too long to respond)"}
+2024-07-31 22:52:35,366:INFO:Contact: undefined
+2024-07-31 22:52:35,366:INFO:Message: test
+2024-07-31 22:55:50,862:INFO:Contact: +91
+2024-07-31 22:55:50,862:INFO:Message: 8530888346
+2024-07-31 22:56:04,426:INFO:Message sent successfully to +91. Response: {"messages":"The request to the API has timed out. Please try again later, or if the issue persists, please contact the API provider", "info": "Your Client (working) ---> Gateway (working) ---> API (took too long to respond)"}
+2024-07-31 22:57:06,251:INFO:Contact: +91445308846
+2024-07-31 22:57:06,251:INFO:Message: testing
+2024-07-31 22:57:16,627:INFO:Message sent successfully to +91445308846. Response: {"messages":"The request to the API has timed out. Please try again later, or if the issue persists, please contact the API provider", "info": "Your Client (working) ---> Gateway (working) ---> API (took too long to respond)"}
+2024-07-31 22:59:30,551:INFO:Contact: +919518364304
+2024-07-31 22:59:30,551:INFO:Message: testing
+2024-07-31 22:59:40,430:INFO:Message sent successfully to +919518364304. Response: {"messages":"The request to the API has timed out. Please try again later, or if the issue persists, please contact the API provider", "info": "Your Client (working) ---> Gateway (working) ---> API (took too long to respond)"}
+2024-07-31 23:06:20,270:INFO:Contact: +91
+2024-07-31 23:06:20,270:INFO:Message: 8530888346
+2024-07-31 23:06:30,823:INFO:Message sent successfully to +91. Response: {"messages":"The request to the API has timed out. Please try again later, or if the issue persists, please contact the API provider", "info": "Your Client (working) ---> Gateway (working) ---> API (took too long to respond)"}
+2024-07-31 23:09:20,212:INFO:Contact: +91
+2024-07-31 23:09:20,212:INFO:Message: 8530888346
+2024-07-31 23:09:31,031:INFO:Message sent successfully to +91. Response: {"messages":"The request to the API has timed out. Please try again later, or if the issue persists, please contact the API provider", "info": "Your Client (working) ---> Gateway (working) ---> API (took too long to respond)"}
+2024-07-31 23:15:08,028:INFO:Contact: +91
+2024-07-31 23:15:08,028:INFO:Message: 8530888346
+2024-07-31 23:15:18,777:INFO:Message sent successfully to +91. Response: {"messages":"The request to the API has timed out. Please try again later, or if the issue persists, please contact the API provider", "info": "Your Client (working) ---> Gateway (working) ---> API (took too long to respond)"}
+2024-07-31 23:18:56,381:INFO:Contact: +91 8530888346
+2024-07-31 23:18:56,381:INFO:Message: testing
+2024-07-31 23:19:06,663:INFO:Message sent successfully to +91 8530888346. Response: {"messages":"The request to the API has timed out. Please try again later, or if the issue persists, please contact the API provider", "info": "Your Client (working) ---> Gateway (working) ---> API (took too long to respond)"}
+2024-07-31 23:20:42,204:INFO:Contact: +91 9518364304
+2024-07-31 23:20:42,204:INFO:Message: pl
+2024-07-31 23:20:52,599:INFO:Message sent successfully to +91 9518364304. Response: {"messages":"The request to the API has timed out. Please try again later, or if the issue persists, please contact the API provider", "info": "Your Client (working) ---> Gateway (working) ---> API (took too long to respond)"}
+2024-07-31 23:27:31,679:INFO:Contact: +91 9518364304
+2024-07-31 23:27:31,679:INFO:Message: why
+2024-07-31 23:28:38,202:INFO:Contact: +91 9518364304
+2024-07-31 23:28:38,202:INFO:Message: why
+2024-07-31 23:34:04,517:INFO:Contact: +91 9518364304
+2024-07-31 23:34:04,517:INFO:Message: why
+2024-07-31 23:34:57,553:INFO:Contact: +91 9518364304
+2024-07-31 23:34:57,553:INFO:Message: sad
+2024-07-31 23:36:09,474:INFO:Contact: +91 9518364304
+2024-07-31 23:36:09,474:INFO:Message: sad
+2024-07-31 23:36:19,929:INFO:Message sent successfully to +91 9518364304. Response: {"messages":"The request to the API has timed out. Please try again later, or if the issue persists, please contact the API provider", "info": "Your Client (working) ---> Gateway (working) ---> API (took too long to respond)"}
+2024-08-07 09:53:20,355:INFO:Contact: +91 8530888346
+2024-08-07 09:53:20,387:INFO:Message: hello bro
+2024-08-07 09:53:32,131:INFO:Message sent successfully to +91 8530888346. Response: {"messages":"The request to the API has timed out. Please try again later, or if the issue persists, please contact the API provider", "info": "Your Client (working) ---> Gateway (working) ---> API (took too long to respond)"}
+2024-08-07 10:01:22,167:INFO:Contact: +91 8530888346
+2024-08-07 10:01:22,167:INFO:Message: hiiii
+2024-08-07 10:01:23,323:INFO:Contact: +91 8530888346
+2024-08-07 10:01:23,323:INFO:Message: hiiii
+2024-08-07 10:01:24,128:INFO:Contact: +91 8530888346
+2024-08-07 10:01:24,128:INFO:Message: hiiii
+2024-08-07 10:01:33,827:INFO:Message sent successfully to +91 8530888346. Response: {"messages":"The request to the API has timed out. Please try again later, or if the issue persists, please contact the API provider", "info": "Your Client (working) ---> Gateway (working) ---> API (took too long to respond)"}
+2024-08-07 10:01:33,835:INFO:Message sent successfully to +91 8530888346. Response: {"messages":"The request to the API has timed out. Please try again later, or if the issue persists, please contact the API provider", "info": "Your Client (working) ---> Gateway (working) ---> API (took too long to respond)"}
+2024-08-07 10:01:35,123:INFO:Message sent successfully to +91 8530888346. Response: {"messages":"The request to the API has timed out. Please try again later, or if the issue persists, please contact the API provider", "info": "Your Client (working) ---> Gateway (working) ---> API (took too long to respond)"}
+2024-08-07 10:02:11,262:INFO:Contact: +91 9518364304
+2024-08-07 10:02:11,262:INFO:Message: hii testing
+2024-08-07 10:02:22,357:INFO:Message sent successfully to +91 9518364304. Response: {"messages":"The request to the API has timed out. Please try again later, or if the issue persists, please contact the API provider", "info": "Your Client (working) ---> Gateway (working) ---> API (took too long to respond)"}
+2024-08-07 10:09:00,264:INFO:Contact: +91 9518364304
+2024-08-07 10:09:00,264:INFO:Message: hello
+2024-08-07 10:09:09,943:INFO:Message sent successfully to +91 9518364304. Response: {"messages":"The request to the API has timed out. Please try again later, or if the issue persists, please contact the API provider", "info": "Your Client (working) ---> Gateway (working) ---> API (took too long to respond)"}
