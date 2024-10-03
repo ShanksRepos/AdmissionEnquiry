@@ -34,6 +34,118 @@ app.get('/api/student_details', (req, res) => {
   });
 });
 
+app.post('/api/add_student_filled_form', (req, res) => {
+  const { name, phone, parent_phone, gender, percentage } = req.body;
+
+  // Validate the incoming data
+  if (!name || !phone || !gender || percentage === undefined) {
+    return res.status(400).json({ error: 'All fields are required except Parent Phone.' });
+  }
+
+  // Insert the student data into the confirm_admissions table
+  const query = `
+    INSERT INTO students_who_have_filled_admission_form (name, phone, parent_phone, gender, percentage)
+    VALUES (?, ?, ?, ?, ?)
+  `;
+  const values = [name, phone, parent_phone, gender, percentage];
+
+  connection.query(query, values, (err, results) => {
+    if (err) {
+      console.error('Error inserting data into students_who_have_filled_admission_form table:', err);
+      return res.status(500).json({ error: 'Failed to insert data into students_who_have_filled_admission_form table.' });
+    }
+    res.status(200).json({ message: 'Student added successfully!' });
+  });
+});
+
+
+app.get('/api/confirm_admissions', (req, res) => {
+  const query = 'SELECT * FROM confirm_admissions';
+
+  connection.query(query, (err, results) => {
+    if (err) {
+      console.error('Error fetching data from students_who_have_filled_admission_form:', err);
+      return res.status(500).send('Failed to fetch student data');
+    }
+    res.json(results);
+  });
+});
+
+app.post('/api/confirm_admission', (req, res) => {
+  const { name, phone, parent_phone, gender, percentage } = req.body;
+
+  // Validate the incoming data
+  if (!name || !phone || !gender || percentage === undefined) {
+    return res.status(400).json({ error: 'All fields are required except Parent Phone.' });
+  }
+
+  // Insert the student data into the confirm_admissions table
+  const query = `
+    INSERT INTO confirm_admissions (name, phone, parent_phone, gender, percentage)
+    VALUES (?, ?, ?, ?, ?)
+  `;
+  const values = [name, phone, parent_phone, gender, percentage];
+
+  connection.query(query, values, (err, results) => {
+    if (err) {
+      console.error('Error inserting data into confirm_admissions table:', err);
+      return res.status(500).json({ error: 'Failed to insert data into confirm_admissions table.' });
+    }
+    res.status(200).json({ message: 'Student admission confirmed successfully!' });
+  });
+});
+
+app.post('/api/confirm_multiple_admissions', (req, res) => {
+  const { students } = req.body;
+
+  if (!students || students.length === 0) {
+    return res.status(400).json({ error: 'No students selected for admission confirmation.' });
+  }
+
+  const query = `
+    INSERT INTO confirm_admissions (name, phone, parent_phone, gender, percentage)
+    VALUES ?`;
+
+  const values = students.map(student => [
+    student.name,
+    student.phone,
+    student.parent_phone,
+    student.gender,
+    student.percentage
+  ]);
+
+  connection.query(query, [values], (err, results) => {
+    if (err) {
+      console.error('Error inserting multiple students into confirm_admissions table:', err);
+      return res.status(500).json({ error: 'Failed to confirm multiple students.' });
+    }
+    res.status(200).json({ message: 'Students confirmed successfully!' });
+  });
+});
+
+app.delete('/api/:tableName/:id', (req, res) => {
+  const { tableName, id } = req.params;
+
+  // Whitelist of valid table names to prevent SQL injection
+  const validTables = ['students_who_have_filled_admission_form', 'confirm_admissions','student_enquiry']; // Add other valid tables here
+
+  if (!validTables.includes(tableName)) {
+    return res.status(400).send('Invalid table name');
+  }
+
+  const sql = `DELETE FROM ?? WHERE id = ?`;
+
+  connection.query(sql, [tableName, id], (error, results) => {
+    if (error) {
+      return res.status(500).send('Error deleting record');
+    }
+    if (results.affectedRows === 0) {
+      return res.status(404).send('Record not found');
+    }
+    res.send('Record deleted successfully');
+  });
+});
+
 
 app.post('/api/send_message', async (req, res) => {
   console.log('Received request body:', req.body);

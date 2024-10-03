@@ -4,6 +4,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import StudentForm from '../StudentForm';
+import { FaTrash } from 'react-icons/fa'; // Import bin logo (trash icon)
 
 const StudentEnquiry = () => {
   const [students, setStudents] = useState([]);
@@ -72,6 +73,56 @@ const StudentEnquiry = () => {
       alert('Messages sent successfully!');
     } catch (error) {
       setError('Failed to send messages');
+    }
+  };
+
+  const addStudenttofilledform = async (student) => {
+    try {
+      const response = await axios.post('http://localhost:3001/api/add_student_filled_form', {
+        name: student.name,
+        phone: student.phone,
+        parent_phone: student.parent_phone,
+        gender: student.gender,
+        percentage: student.percentage,
+      });
+      if (response.status === 200) {
+        alert('Student added successfully!');
+      } else {
+        alert('Failed to add student');
+      }
+    } catch (error) {
+      console.error('Error adding student:', error);
+      alert('Failed to insert student to the table');
+    }
+  };
+
+  const deleteStudent = async (student_id) => {
+    try {
+      const response = await axios.delete(`http://localhost:3001/api/student_enquiry/${student_id}`);
+      if (response.status === 200) {
+        alert('Student deleted successfully!');
+        fetchStudents(); // Refresh the student list after deletion
+      } else {
+        alert('Failed to delete student');
+      }
+    } catch (error) {
+      console.error('Error deleting student:', error);
+      alert('Failed to delete student');
+    }
+  };
+
+  const deleteSelectedStudents = async () => {
+    try {
+      const promises = selectedStudents.map(student_id => 
+        axios.delete(`http://localhost:3001/api/student_enquiry/${student_id}`)
+      );
+      await Promise.all(promises);
+      alert('Selected students deleted successfully!');
+      setSelectedStudents([]); // Clear selected students after deletion
+      fetchStudents(); // Refresh the student list after deletion
+    } catch (error) {
+      console.error('Error deleting selected students:', error);
+      alert('Failed to delete selected students');
     }
   };
 
@@ -148,6 +199,9 @@ const StudentEnquiry = () => {
             <button className="btn btn-info" onClick={sendAdmissionDate} disabled={loading}>
               Send Admission Date
             </button>
+            <button className="btn btn-danger ml-2" onClick={deleteSelectedStudents}>
+              Delete Selected Students
+            </button>
           </div>
         </div>
       </div>
@@ -187,6 +241,14 @@ const StudentEnquiry = () => {
                 <td>{student.parent_phone}</td>
                 <td>{student.gender}</td>
                 <td>{student.percentage}</td>
+                <td>
+                <button className="btn btn-success" onClick={() => addStudenttofilledform(student)}>
+                  Add to Filled Form
+                </button>
+                <button className="btn btn-danger ml-2" onClick={() => deleteStudent(student.id)}>
+                  <FaTrash />
+                </button>
+              </td>
               </tr>
             ))
           ) : (
