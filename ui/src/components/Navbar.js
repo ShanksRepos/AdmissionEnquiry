@@ -1,16 +1,31 @@
-import React from 'react'
-import { NavLink } from 'react-router-dom'
+import React from 'react';
+import { NavLink } from 'react-router-dom';
 
- const Navbar = () => {
+const Navbar = ({ setIsAuthenticated }) => {
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    setIsAuthenticated(false);
+  };
+
+  const isAuthenticated = localStorage.getItem('user');
+
   return (
     <div>
       <nav>
-      <NavLink className={(e)=>{return e.isActive?"red":""}}to ="/"><li>Admission Enquiry</li></NavLink>
-      <NavLink className={(e)=>{return e.isActive?"red":""}}to ="/student_enquiry2"><li>Students who filled Admission Form</li></NavLink>
-      <NavLink className={(e)=>{return e.isActive?"red":""}}to ="/ConfirmAdmissions"><li>Confirm Admissions</li></NavLink>
+        <NavLink to="/">Admission Enquiry</NavLink>
+        <NavLink to="/student_enquiry2">Students who filled Admission Form</NavLink>
+        <NavLink to="/ConfirmAdmissions">Confirm Admissions</NavLink>
+        {!isAuthenticated ? (
+          <>
+            <NavLink to="/Register">Register</NavLink>
+            <NavLink to="/Login">Login</NavLink>
+          </>
+        ) : (
+          <button onClick={handleLogout}>Logout</button>
+        )}
       </nav>
     </div>
-  )
-}
+  );
+};
 
 export default Navbar;

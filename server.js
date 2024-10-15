@@ -2,9 +2,9 @@ const express = require('express');
 const mysql = require('mysql2');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const { exec } = require('child_process');
-const path = require('path');
-//const fetch = require('node-fetch'); 
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+require('dotenv').config();
 
 const app = express();
 app.use(bodyParser.json());
@@ -25,6 +25,76 @@ connection.connect(err => {
   console.log('Connected to the database');
 });
 
+const jwtSecret = process.env.JWT_SECRET || 'secret';
+
+// JWT Token Validation Middleware
+const authenticateToken = (req, res, next) => {
+  const token = req.headers['authorization'];
+  if (!token) return res.status(401).json({ message: 'Access denied' });
+
+  jwt.verify(token, jwtSecret, (err, user) => {
+    if (err) return res.status(403).json({ message: 'Invalid token' });
+    req.user = user;
+    next();
+  });
+};
+
+// User registration
+app.post('/register', async (req, res) => {
+  const { name, email, password } = req.body;
+
+  try {
+    const hashedPassword = await bcrypt.hash(password, 10); // Hash the password
+
+    connection.query(
+      'INSERT INTO users (name, email, password) VALUES (?, ?, ?)', 
+      [name, email, hashedPassword], 
+      (err, result) => {
+        if (err) {
+          console.error('Error inserting user:', err);
+          return res.status(500).json({ message: 'User registration failed' });
+        }
+        if (err.code === 'ER_DUP_ENTRY') {
+          res.status(400).json({ message: 'Email already exists. Please use a different email.' });
+        } else {
+          res.status(500).json({ message: 'Server error. Please try again later.' });
+        }        
+        res.status(201).json({ message: 'User registered successfully' });
+      }
+    );
+  } catch (error) {
+    res.status(500).json({ message: 'Error hashing password' });
+  }
+});
+
+// User login
+app.post('/login', (req, res) => {
+  const { email, password } = req.body;
+  console.log(email, password);
+
+  connection.query('SELECT * FROM users WHERE email = ?', [email], async (err, results) => {
+    if (err || results.length === 0) {
+      return res.status(400).json({ message: 'User not found' });
+    }
+
+    const user = results[0];
+    
+    try {
+      const isMatch = await bcrypt.compare(password, user.password); // Compare the password with the stored hash
+      if (!isMatch) {
+        return res.status(400).json({ message: 'Invalid credentials' });
+      }
+
+      const token = jwt.sign({ id: user.id }, jwtSecret, { expiresIn: '1h' });
+      res.json({ token, message: 'Logged in successfully' });
+    } catch (error) {
+      console.error('Error comparing password:', error);
+      res.status(500).json({ message: 'Error during login' });
+    }
+  });
+});
+
+// Fetch student details
 app.get('/api/student_details', (req, res) => {
   connection.query('SELECT * FROM student_enquiry', (err, results) => {
     if (err) {
@@ -34,15 +104,14 @@ app.get('/api/student_details', (req, res) => {
   });
 });
 
+// Add student who filled admission form
 app.post('/api/add_student_filled_form', (req, res) => {
   const { name, phone, parent_phone, gender, percentage } = req.body;
 
-  // Validate the incoming data
   if (!name || !phone || !gender || percentage === undefined) {
     return res.status(400).json({ error: 'All fields are required except Parent Phone.' });
   }
 
-  // Insert the student data into the confirm_admissions table
   const query = `
     INSERT INTO students_who_have_filled_admission_form (name, phone, parent_phone, gender, percentage)
     VALUES (?, ?, ?, ?, ?)
@@ -58,28 +127,27 @@ app.post('/api/add_student_filled_form', (req, res) => {
   });
 });
 
-
+// Fetch confirmed admissions
 app.get('/api/confirm_admissions', (req, res) => {
   const query = 'SELECT * FROM confirm_admissions';
 
   connection.query(query, (err, results) => {
     if (err) {
-      console.error('Error fetching data from students_who_have_filled_admission_form:', err);
+      console.error('Error fetching data from confirm_admissions:', err);
       return res.status(500).send('Failed to fetch student data');
     }
     res.json(results);
   });
 });
 
+// Confirm admission
 app.post('/api/confirm_admission', (req, res) => {
   const { name, phone, parent_phone, gender, percentage } = req.body;
 
-  // Validate the incoming data
   if (!name || !phone || !gender || percentage === undefined) {
     return res.status(400).json({ error: 'All fields are required except Parent Phone.' });
   }
 
-  // Insert the student data into the confirm_admissions table
   const query = `
     INSERT INTO confirm_admissions (name, phone, parent_phone, gender, percentage)
     VALUES (?, ?, ?, ?, ?)
@@ -95,6 +163,7 @@ app.post('/api/confirm_admission', (req, res) => {
   });
 });
 
+// Confirm multiple admissions
 app.post('/api/confirm_multiple_admissions', (req, res) => {
   const { students } = req.body;
 
@@ -123,11 +192,11 @@ app.post('/api/confirm_multiple_admissions', (req, res) => {
   });
 });
 
+// Delete student record
 app.delete('/api/:tableName/:id', (req, res) => {
   const { tableName, id } = req.params;
 
-  // Whitelist of valid table names to prevent SQL injection
-  const validTables = ['students_who_have_filled_admission_form', 'confirm_admissions','student_enquiry']; // Add other valid tables here
+  const validTables = ['students_who_have_filled_admission_form', 'confirm_admissions','student_enquiry'];
 
   if (!validTables.includes(tableName)) {
     return res.status(400).send('Invalid table name');
@@ -146,39 +215,28 @@ app.delete('/api/:tableName/:id', (req, res) => {
   });
 });
 
-
-app.post('/api/send_message', async (req, res) => {
-  console.log('Received request body:', req.body);
+// Send message via WhatsApp API (protected by JWT)
+app.post('/api/send_message', authenticateToken, async (req, res) => {
   const { contact, message } = req.body;
-  console.log('Received contact:', contact);
 
-  // Define the URL for the WhatsApp API
   const apiUrl = 'http://localhost:3000/api/sendText';
-
-  // Define the payload for the WhatsApp API
   const payload = {
     session: 'default',
-    chatId: `${contact}@c.us`,  // Adjust as necessary for your contact format
+    chatId: `${contact}@c.us`,
     text: message
   };
 
   try {
-    // Send the POST request to the WhatsApp API
     const response = await fetch(apiUrl, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
 
     const data = await response.json();
-
     if (response.ok) {
-      console.log('Message sent successfully:', data);
       res.status(200).json({ message: 'Message sent successfully', output: data });
     } else {
-      console.error('Error sending message:', data);
       res.status(response.status).json({ error: 'Failed to send message', details: data });
     }
   } catch (error) {
@@ -187,38 +245,34 @@ app.post('/api/send_message', async (req, res) => {
   }
 });
 
+// Add new student
 app.post('/api/add_student', (req, res) => {
   const { name, phone, parent_phone, gender, percentage } = req.body;
-  
-   const query = `
-    INSERT INTO student_enquiry 
-    (name, phone, parent_phone, gender, percentage) 
+
+  const query = `
+    INSERT INTO student_enquiry (name, phone, parent_phone, gender, percentage)
     VALUES (?, ?, ?, ?, ?)`;
 
-   // Also insert into students_who_have_filled_admission_form
-   const insertAdmissionFormQuery = `
-    INSERT INTO students_who_have_filled_admission_form
-    (name, phone, parent_phone, gender, percentage)
+  const insertAdmissionFormQuery = `
+    INSERT INTO students_who_have_filled_admission_form (name, phone, parent_phone, gender, percentage)
     VALUES (?, ?, ?, ?, ?)`;
 
-    connection.query(query, [name, phone, parent_phone, gender, percentage], (err, results) => {
-      if (err) {
-        console.error('Error inserting data:', err);
-        return res.status(500).send('Failed to add student data');
-      }
-       // Insert into students_who_have_filled_admission_form
+  connection.query(query, [name, phone, parent_phone, gender, percentage], (err, results) => {
+    if (err) {
+      console.error('Error inserting data:', err);
+      return res.status(500).send('Failed to add student data');
+    }
     connection.query(insertAdmissionFormQuery, [name, phone, parent_phone, gender, percentage], (err, results) => {
       if (err) {
         console.error('Error inserting data into students_who_have_filled_admission_form:', err);
         return res.status(500).send('Failed to add student data to the second table');
       }
-      // Send success response only once
       res.status(200).send('Student data added successfully to both tables');
     });
   });
 });
 
-
+// Fetch students who have filled admission form
 app.get('/api/students_who_have_filled_admission_form', (req, res) => {
   const query = 'SELECT * FROM students_who_have_filled_admission_form';
 
@@ -231,32 +285,6 @@ app.get('/api/students_who_have_filled_admission_form', (req, res) => {
   });
 });
 
-// API to insert a new student into 'students_who_have_filled_admission_form' table
-app.post('/api/add_filled_admission_form_student', (req, res) => {
-  const { name, phone, parent_phone, gender, percentage } = req.body;
-
-  // Validate the incoming data
-  if (!name || !phone || !gender || percentage === undefined) {
-    return res.status(400).json({ error: 'All fields are required except Parent Phone.' });
-  }
-
-  const query = `
-    INSERT INTO students_who_have_filled_admission_form (name, phone, parent_phone, gender, percentage)
-    VALUES (?, ?, ?, ?, ?)
-  `;
-  const values = [name, phone, parent_phone, gender, percentage];
-
-  connection.query(query, values, (err, results) => {
-    if (err) {
-      console.error('Error inserting data into table:', err);
-      return res.status(500).json({ error: 'Failed to insert data into table.' });
-    }
-    res.json({ message: 'Student added successfully to the admission form table!' });
-  });
-});
-
-
-const PORT = 3001;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+app.listen(3001, () => {
+  console.log('Server running on port 3001');
 });

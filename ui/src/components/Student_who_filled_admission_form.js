@@ -4,7 +4,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import StudentForm from '../StudentForm';
-import { FaTrash } from 'react-icons/fa'; // Import bin logo (trash icon)
+import { FaTrash, FaUserGraduate, FaEnvelope, FaCalendarAlt, FaUserPlus, FaCheckCircle } from 'react-icons/fa';
 
 const StudentWhoFilledAdmissionForm = () => {
   const [students, setStudents] = useState([]);
@@ -132,7 +132,7 @@ const StudentWhoFilledAdmissionForm = () => {
       const response = await axios.delete(`http://localhost:3001/api/students_who_have_filled_admission_form/${student_id}`);
       if (response.status === 200) {
         alert('Student deleted successfully!');
-        fetchStudents(); // Refresh the student list after deletion
+        fetchStudents();
       } else {
         alert('Failed to delete student');
       }
@@ -149,8 +149,8 @@ const StudentWhoFilledAdmissionForm = () => {
       );
       await Promise.all(promises);
       alert('Selected students deleted successfully!');
-      setSelectedStudents([]); // Clear selected students after deletion
-      fetchStudents(); // Refresh the student list after deletion
+      setSelectedStudents([]);
+      fetchStudents();
     } catch (error) {
       console.error('Error deleting selected students:', error);
       alert('Failed to delete selected students');
@@ -158,101 +158,159 @@ const StudentWhoFilledAdmissionForm = () => {
   };
 
   return (
-    <div className="container mt-4">
-      <h1 className="text-center mt-4">Students Who Have Filled Admission Form</h1>
+    <div className="container-fluid bg-light py-4">
+      <div className="row justify-content-center">
+        <div className="col-lg-10">
+          <div className="card shadow-sm">
+            <div className="card-body">
+              <h1 className="text-center mb-4 text-primary">
+                <FaUserGraduate className="mr-2" />
+                Student Admission Management
+              </h1>
 
-      <button onClick={toggleForm} className="btn btn-outline-primary mt-3">
-        {showForm ? 'Hide Form' : 'Add Student'}
-      </button>
-      {showForm && <StudentForm tableName="students_who_have_filled_admission_form" />}
+              <div className="row mb-4">
+                <div className="col-md-4">
+                  <div className="card h-100 border-0 shadow-sm">
+                    <div className="card-body">
+                      <h5 className="card-title text-secondary">
+                        <FaUserPlus className="mr-2" />
+                        Add New Student
+                      </h5>
+                      <button onClick={toggleForm} className="btn btn-outline-primary btn-block mt-3">
+                        {showForm ? 'Hide Form' : 'Show Form'}
+                      </button>
+                      {showForm && <StudentForm tableName="students_who_have_filled_admission_form" />}
+                    </div>
+                  </div>
+                </div>
 
-      <div className="mb-3">
-        <button onClick={toggleCustomMessage} className="btn btn-info mt-3">
-          {showCustomMessage ? 'Hide Custom Message' : 'Custom Message'}
-        </button>
-        {showCustomMessage && (
-          <div>
-            <textarea
-              className="form-control mt-3 p-2 border-info"
-              rows="3"
-              placeholder="Enter your message here"
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-            />
-            <button className="btn btn-primary mt-3" onClick={handleSendMessage}>
-              Send Message
-            </button>
-          </div>
-        )}
-      </div>
+                <div className="col-md-4">
+                  <div className="card h-100 border-0 shadow-sm">
+                    <div className="card-body">
+                      <h5 className="card-title text-secondary">
+                        <FaEnvelope className="mr-2" />
+                        Custom Message
+                      </h5>
+                      <button onClick={toggleCustomMessage} className="btn btn-outline-info btn-block mt-3">
+                        {showCustomMessage ? 'Hide Message' : 'Compose Message'}
+                      </button>
+                      {showCustomMessage && (
+                        <div className="mt-3">
+                          <textarea
+                            className="form-control mb-2"
+                            rows="3"
+                            placeholder="Enter your message here"
+                            value={message}
+                            onChange={(e) => setMessage(e.target.value)}
+                          />
+                          <button className="btn btn-primary btn-block" onClick={handleSendMessage}>
+                            Send Message
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
 
-      <div className="mb-3">
-        <div className="input-group mt-3">
-          <DatePicker
-            selected={lectureStartDate}
-            onChange={(date) => setLectureStartDate(date)}
-            dateFormat="dd/MM/yyyy"
-            placeholderText="Select lecture start date"
-            className="form-control"
-          />
-          <div className="input-group-append">
-            <button className="btn btn-info" onClick={sendLectureStartDate}>
-              Send Lecture Start Date
-            </button>
-            <button className="btn btn-danger ml-2" onClick={deleteSelectedStudents}>
-              Delete Selected Students
-            </button>
+                <div className="col-md-4">
+                  <div className="card h-100 border-0 shadow-sm">
+                    <div className="card-body">
+                      <h5 className="card-title text-secondary">
+                        <FaCalendarAlt className="mr-2" />
+                        Lecture Start Date
+                      </h5>
+                      <div className="input-group mt-3">
+                        <DatePicker
+                          selected={lectureStartDate}
+                          onChange={(date) => setLectureStartDate(date)}
+                          dateFormat="dd/MM/yyyy"
+                          placeholderText="Select date"
+                          className="form-control"
+                        />
+                        <div className="input-group-append">
+                          <button className="btn btn-outline-info" onClick={sendLectureStartDate}>
+                            Send Date
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="card border-0 shadow-sm">
+                <div className="card-body">
+                  <h5 className="card-title text-secondary mb-3">Student List</h5>
+                  <div className="table-responsive">
+                    <table className="table table-hover">
+                      <thead className="thead-light">
+                        <tr>
+                          <th>
+                            <div className="custom-control custom-checkbox">
+                              <input
+                                type="checkbox"
+                                className="custom-control-input"
+                                id="selectAll"
+                                checked={selectedStudents.length === students.length && students.length > 0}
+                                onChange={handleSelectAll}
+                              />
+                              <label className="custom-control-label" htmlFor="selectAll"></label>
+                            </div>
+                          </th>
+                          <th>ID</th>
+                          <th>Name</th>
+                          <th>Phone</th>
+                          <th>Parent Phone</th>
+                          <th>Gender</th>
+                          <th>Percentage</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {students.map(student => (
+                          <tr key={student.id}>
+                            <td>
+                              <div className="custom-control custom-checkbox">
+                                <input
+                                  type="checkbox"
+                                  className="custom-control-input"
+                                  id={`student-${student.id}`}
+                                  checked={selectedStudents.includes(student.id)}
+                                  onChange={() => handleSelectStudent(student.id)}
+                                />
+                                <label className="custom-control-label" htmlFor={`student-${student.id}`}></label>
+                              </div>
+                            </td>
+                            <td>{student.id}</td>
+                            <td>{student.name}</td>
+                            <td>{student.phone}</td>
+                            <td>{student.parent_phone}</td>
+                            <td>{student.gender}</td>
+                            <td>{student.percentage}%</td>
+                            <td>
+                              <button className="btn btn-outline-success btn-sm mr-2" onClick={() => confirmAdmission(student)}>
+                                <FaCheckCircle className="mr-1" />
+                                Confirm
+                              </button>
+                              <button className="btn btn-outline-danger btn-sm" onClick={() => deleteStudent(student.id)}>
+                                <FaTrash />
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  <button className="btn btn-danger mt-3" onClick={deleteSelectedStudents}>
+                    <FaTrash className="mr-2" />
+                    Delete Selected Students
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-
-      <table className="table table-hover table-bordered mt-4">
-        <thead className="thead-dark">
-          <tr>
-            <th>
-              <input
-                type="checkbox"
-                checked={selectedStudents.length === students.length && students.length > 0}
-                onChange={handleSelectAll}
-              />
-            </th>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Phone</th>
-            <th>Parent Phone</th>
-            <th>Gender</th>
-            <th>Percentage</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {students.map(student => (
-            <tr key={student.id}>
-              <td>
-                <input
-                  type="checkbox"
-                  checked={selectedStudents.includes(student.id)}
-                  onChange={() => handleSelectStudent(student.id)}
-                />
-              </td>
-              <td>{student.id}</td>
-              <td>{student.name}</td>
-              <td>{student.phone}</td>
-              <td>{student.parent_phone}</td>
-              <td>{student.gender}</td>
-              <td>{student.percentage}</td>
-              <td>
-                <button className="btn btn-success" onClick={() => confirmAdmission(student)}>
-                  Confirm Admission
-                </button>
-                <button className="btn btn-danger ml-2" onClick={() => deleteStudent(student.id)}>
-                  <FaTrash />
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
     </div>
   );
 };
