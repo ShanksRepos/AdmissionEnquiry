@@ -7,6 +7,8 @@ import Student_who_filled_admission_form from './components/Student_who_filled_a
 import ConfirmAdmissions from './components/ConfirmAdmissions';
 import Register from './components/Register';
 import Login from './components/Login';
+import ExcelUploader from './components/Merit1';
+import Merit1 from './components/Merit1';
 
 // Higher-order component to protect routes
 const ProtectedRoute = ({ isAuthenticated, children }) => {
@@ -26,16 +28,34 @@ const App = () => {
 
   const router = createBrowserRouter([
     {
-      path: '/',
-      element: isAuthenticated ? <Navigate to="/student_enquiry2" /> : <Navigate to="/Login" />,  // Redirects to either the student page or login based on auth
-    },
-    {
-      path: '/student_enquiry2',
+      path: '/',  // Admission Enquiry should show the Student_enquiry component
       element: (
         <ProtectedRoute isAuthenticated={isAuthenticated}>
           <div>
             <Navbar setIsAuthenticated={setIsAuthenticated} />
-            <Student_who_filled_admission_form />
+            <Student_enquiry />  {/* Render Student_enquiry component here */}
+          </div>
+        </ProtectedRoute>
+      ),
+    },
+    {
+      path: '/student_enquiry2',  // For Students who filled Admission Form
+      element: (
+        <ProtectedRoute isAuthenticated={isAuthenticated}>
+          <div>
+            <Navbar setIsAuthenticated={setIsAuthenticated} />
+           <Student_who_filled_admission_form/>  {/* Render Student_who_filled_admission_form here */}
+          </div>
+        </ProtectedRoute>
+      ),
+    },
+    {
+      path: '/merit1',  // For Students who filled Admission Form
+      element: (
+        <ProtectedRoute isAuthenticated={isAuthenticated}>
+          <div>
+            <Navbar setIsAuthenticated={setIsAuthenticated} />
+           <Merit1/>  {/* Render Student_who_filled_admission_form here */}
           </div>
         </ProtectedRoute>
       ),
@@ -68,7 +88,7 @@ const App = () => {
       ),
     },
   ]);
-
+  
   return (
     <div>
       <RouterProvider router={router} />

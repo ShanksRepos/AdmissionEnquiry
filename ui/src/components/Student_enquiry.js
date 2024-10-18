@@ -4,7 +4,8 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import StudentForm from '../StudentForm';
-import { FaTrash, FaUserPlus, FaEnvelope, FaCalendarAlt, FaClipboardList, FaCheckCircle } from 'react-icons/fa';
+import { FaTrash, FaUserPlus, FaEnvelope, FaCalendarAlt, FaClipboardList, FaCheckCircle, FaInfoCircle } from 'react-icons/fa';
+import { Tooltip } from 'react-tooltip';
 
 const StudentEnquiry = () => {
   const [students, setStudents] = useState([]);
@@ -15,6 +16,7 @@ const StudentEnquiry = () => {
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [hoveredStudentId, setHoveredStudentId] = useState(null);
 
   useEffect(() => {
     fetchStudents();
@@ -113,7 +115,7 @@ const StudentEnquiry = () => {
 
   const deleteSelectedStudents = async () => {
     try {
-      const promises = selectedStudents.map(student_id => 
+      const promises = selectedStudents.map(student_id =>
         axios.delete(`http://localhost:3001/api/student_enquiry/${student_id}`)
       );
       await Promise.all(promises);
@@ -153,6 +155,14 @@ const StudentEnquiry = () => {
 
   const toggleCustomMessage = () => {
     setShowCustomMessage(!showCustomMessage);
+  };
+
+  const handleHover = (studentId) => {
+    setHoveredStudentId(studentId);
+  };
+
+  const handleMouseLeave = () => {
+    setHoveredStudentId(null);
   };
 
   return (
@@ -238,85 +248,81 @@ const StudentEnquiry = () => {
                 </div>
               </div>
 
-              <div className="card border-0 shadow-sm">
-                <div className="card-body">
-                  <h5 className="card-title text-secondary mb-3">Student List</h5>
-                  <div className="table-responsive">
-                    <table className="table table-hover">
-                      <thead className="thead-light">
-                        <tr>
-                          <th>
-                            <div className="custom-control custom-checkbox">
-                              <input
-                                type="checkbox"
-                                className="custom-control-input"
-                                id="selectAll"
-                                checked={selectedStudents.length === students.length && students.length > 0}
-                                onChange={handleSelectAll}
-                              />
-                              <label className="custom-control-label" htmlFor="selectAll"></label>
-                            </div>
-                          </th>
-                          <th>ID</th>
-                          <th>Name</th>
-                          <th>Contact</th>
-                          <th>Parent Phone</th>
-                          <th>Gender</th>
-                          <th>Percentage</th>
-                          <th>Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {students.length > 0 ? (
-                          students.map((student) => (
-                            <tr key={student.id}>
-                              <td>
-                                <div className="custom-control custom-checkbox">
-                                  <input
-                                    type="checkbox"
-                                    className="custom-control-input"
-                                    id={`student-${student.id}`}
-                                    checked={selectedStudents.includes(student.id)}
-                                    onChange={() => handleSelectStudent(student.id)}
-                                  />
-                                  <label className="custom-control-label" htmlFor={`student-${student.id}`}></label>
-                                </div>
-                              </td>
-                              <td>{student.id}</td>
-                              <td>{student.name}</td>
-                              <td>{student.phone}</td>
-                              <td>{student.parent_phone}</td>
-                              <td>{student.gender}</td>
-                              <td>{student.percentage}%</td>
-                              <td>
-                                <button className="btn btn-outline-success btn-sm mr-2" onClick={() => addStudenttofilledform(student)}>
-                                  <FaCheckCircle className="mr-1" />
-                                  Add to Filled Form
-                                </button>
-                                <button className="btn btn-outline-danger btn-sm" onClick={() => deleteStudent(student.id)}>
-                                  <FaTrash />
-                                </button>
-                              </td>
-                            </tr>
-                          ))
-                        ) : (
-                          <tr>
-                            <td colSpan="8" className="text-center">No data available</td>
-                          </tr>
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
-                  <button className="btn btn-danger mt-3" onClick={deleteSelectedStudents}>
-                    <FaTrash className="mr-2" />
-                    Delete Selected Students
+              <h5 className="text-secondary">Student List</h5>
+              {loading ? (
+                <div className="text-center">Loading...</div>
+              ) : (
+                <div>
+                  <button className="btn btn-danger mb-2" onClick={deleteSelectedStudents} disabled={selectedStudents.length === 0}>
+                    Delete Selected
                   </button>
+
+                  <table className="table table-bordered table-hover">
+                    <thead>
+                      <tr>
+                        <th>
+                          <input
+                            type="checkbox"
+                            checked={selectedStudents.length === students.length}
+                            onChange={handleSelectAll}
+                          />
+                        </th>
+                        <th>Name</th>
+                        <th>Phone</th>
+                        <th>Parent Phone</th>
+                        <th>Gender</th>
+                        <th>Percentage</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {students.map((student) => (
+                        <tr key={student.id} onMouseEnter={() => handleHover(student.id)} onMouseLeave={handleMouseLeave}>
+                          <td>
+                            <input
+                              type="checkbox"
+                              checked={selectedStudents.includes(student.id)}
+                              onChange={() => handleSelectStudent(student.id)}
+                            />
+                          </td>
+                          <td>
+                            {student.name}
+                            {hoveredStudentId === student.id && (
+                              <span
+                                className="ml-2 text-info"
+                                data-tooltip-id={`tooltip-${student.id}`}
+                                data-tooltip-content={`Added by ${student.added_by}`} // Tooltip content
+                                data-tooltip-place="top"
+                              >
+                                <FaInfoCircle />
+                              </span>
+                            )}
+                          </td>
+                          <td>{student.phone}</td>
+                          <td>{student.parent_phone}</td>
+                          <td>{student.gender}</td>
+                          <td>{student.percentage}</td>
+                          <td>
+                            <button className="btn btn-success mr-2" onClick={() => addStudenttofilledform(student)}>
+                              Add to Filled Form
+                            </button>
+                            <button className="btn btn-danger" onClick={() => deleteStudent(student.id)}>
+                              Delete
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </div>
       </div>
+
+      {/* Tooltip element */}
+      <Tooltip id={`tooltip-${hoveredStudentId}`} />
     </div>
   );
 };

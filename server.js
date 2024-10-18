@@ -55,10 +55,8 @@ app.post('/register', async (req, res) => {
           return res.status(500).json({ message: 'User registration failed' });
         }
         if (err.code === 'ER_DUP_ENTRY') {
-          res.status(400).json({ message: 'Email already exists. Please use a different email.' });
-        } else {
-          res.status(500).json({ message: 'Server error. Please try again later.' });
-        }        
+          return res.status(400).json({ message: 'Email already exists. Please use a different email.' });
+        } 
         res.status(201).json({ message: 'User registered successfully' });
       }
     );
@@ -70,7 +68,6 @@ app.post('/register', async (req, res) => {
 // User login
 app.post('/login', (req, res) => {
   const { email, password } = req.body;
-  console.log(email, password);
 
   connection.query('SELECT * FROM users WHERE email = ?', [email], async (err, results) => {
     if (err || results.length === 0) {
@@ -106,7 +103,7 @@ app.get('/api/student_details', (req, res) => {
 
 // Add student who filled admission form
 app.post('/api/add_student_filled_form', (req, res) => {
-  const { name, phone, parent_phone, gender, percentage } = req.body;
+  const { name, phone, parent_phone, gender, percentage } = req.body; // Removed added_by
 
   if (!name || !phone || !gender || percentage === undefined) {
     return res.status(400).json({ error: 'All fields are required except Parent Phone.' });
@@ -116,7 +113,7 @@ app.post('/api/add_student_filled_form', (req, res) => {
     INSERT INTO students_who_have_filled_admission_form (name, phone, parent_phone, gender, percentage)
     VALUES (?, ?, ?, ?, ?)
   `;
-  const values = [name, phone, parent_phone, gender, percentage];
+  const values = [name, phone, parent_phone, gender, percentage]; // Removed added_by
 
   connection.query(query, values, (err, results) => {
     if (err) {
@@ -196,7 +193,7 @@ app.post('/api/confirm_multiple_admissions', (req, res) => {
 app.delete('/api/:tableName/:id', (req, res) => {
   const { tableName, id } = req.params;
 
-  const validTables = ['students_who_have_filled_admission_form', 'confirm_admissions','student_enquiry'];
+  const validTables = ['students_who_have_filled_admission_form', 'confirm_admissions', 'student_enquiry'];
 
   if (!validTables.includes(tableName)) {
     return res.status(400).send('Invalid table name');
@@ -245,38 +242,10 @@ app.post('/api/send_message', authenticateToken, async (req, res) => {
   }
 });
 
-// Add new student
-app.post('/api/add_student', (req, res) => {
-  const { name, phone, parent_phone, gender, percentage } = req.body;
 
-  const query = `
-    INSERT INTO student_enquiry (name, phone, parent_phone, gender, percentage)
-    VALUES (?, ?, ?, ?, ?)`;
-
-  const insertAdmissionFormQuery = `
-    INSERT INTO students_who_have_filled_admission_form (name, phone, parent_phone, gender, percentage)
-    VALUES (?, ?, ?, ?, ?)`;
-
-  connection.query(query, [name, phone, parent_phone, gender, percentage], (err, results) => {
-    if (err) {
-      console.error('Error inserting data:', err);
-      return res.status(500).send('Failed to add student data');
-    }
-    connection.query(insertAdmissionFormQuery, [name, phone, parent_phone, gender, percentage], (err, results) => {
-      if (err) {
-        console.error('Error inserting data into students_who_have_filled_admission_form:', err);
-        return res.status(500).send('Failed to add student data to the second table');
-      }
-      res.status(200).send('Student data added successfully to both tables');
-    });
-  });
-});
-
-// Fetch students who have filled admission form
+// Fetch students who have filled the admission form
 app.get('/api/students_who_have_filled_admission_form', (req, res) => {
-  const query = 'SELECT * FROM students_who_have_filled_admission_form';
-
-  connection.query(query, (err, results) => {
+  connection.query('SELECT * FROM students_who_have_filled_admission_form', (err, results) => {
     if (err) {
       console.error('Error fetching data from students_who_have_filled_admission_form:', err);
       return res.status(500).send('Failed to fetch student data');
@@ -285,6 +254,81 @@ app.get('/api/students_who_have_filled_admission_form', (req, res) => {
   });
 });
 
-app.listen(3001, () => {
-  console.log('Server running on port 3001');
+app.get('/api/students_filled_form', (req, res) => {
+  const query = 'SELECT * FROM students_who_filled_admission_form';
+
+  connection.query(query, (err, result) => {
+    if (err) {
+      console.error('Error fetching students:', err);
+      return res.status(500).json({ message: 'Server error' });
+    }
+
+    return res.status(200).json(result);
+  });
+});
+
+
+app.post('/api/add_to_merit1', (req, res) => {
+  const { students } = req.body;
+
+  if (!students || students.length === 0) {
+    return res.status(400).json({ error: 'No students to add to merit1' });
+  }
+
+  const query = `
+    INSERT INTO merit1 (name, phone, parent_phone, gender, percentage)
+    VALUES ?
+  `;
+
+  const values = students.map(student => [
+    student.name,
+    student.phone,
+    student.parent_phone,
+    student.gender,
+    student.percentage,
+  ]);
+
+  connection.query(query, [values], (err, results) => {
+    if (err) {
+      console.error('Error inserting students into merit1 table:', err);
+      return res.status(500).json({ error: 'Failed to add students to merit1 table' });
+    }
+    res.status(200).json({ message: 'Students added to merit1 table successfully' });
+  });
+});
+
+
+// Add new student
+app.post('/api/add_student', (req, res) => {
+  const { name, phone, parent_phone, gender, percentage } = req.body; // Removed added_by
+
+  const query = `
+    INSERT INTO student_enquiry (name, phone, parent_phone, gender, percentage)
+    VALUES (?, ?, ?, ?, ?)`;
+
+  const insertAdmissionFormQuery = `
+    INSERT INTO students_who_have_filled_admission_form (name, phone, parent_phone, gender, percentage)
+    VALUES (?, ?, ?, ?, ?)`; // Removed added_by
+
+  connection.query(query, [name, phone, parent_phone, gender, percentage], (err, results) => {
+    if (err) {
+      console.error('Error adding student:', err);
+      return res.status(500).json({ error: 'Failed to add student' });
+    }
+
+    connection.query(insertAdmissionFormQuery, [name, phone, parent_phone, gender, percentage], (err, results) => {
+      if (err) {
+        console.error('Error inserting data into students_who_have_filled_admission_form:', err);
+        return res.status(500).json({ error: 'Failed to insert data into students_who_have_filled_admission_form table.' });
+      }
+
+      res.status(200).json({ message: 'Student added successfully!' });
+    });
+  });
+});
+
+// Start the server
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });
